@@ -1,0 +1,46 @@
+- name: Configure security settings
+  hosts: web_servers
+  become: true
+  gather_facts: false
+
+  vars_files:
+    - /ansible/vars/encrypted_vars.yml
+
+  tasks:
+    - name: Disable root access over SSH
+      lineinfile:
+        dest: /etc/ssh/sshd_config
+        regexp: "^PermitRootLogin"
+        line: "PermitRootLogin no"
+        state: present
+
+    - name: Disable password login over SSH
+      lineinfile:
+        dest: /etc/ssh/sshd_config
+        regexp: "^PasswordAuthentication"
+        line: "PasswordAuthentication no"
+        state: present
+
+    # - name: Configure UFW SSH rate limiting
+    #   ufw:
+    #     rule: limit
+    #     port: ssh
+    #     proto: tcp
+
+    # - name: Disable rate limit for specified IP addresses
+    #   ufw: 
+    #     rule: allow
+    #     from_ip: "{{ item }}"
+    #     port: ssh
+    #     proto: tcp
+    #   with_items: "{{ ufw.no_rate_limit }}"
+
+    # - name: Enable the UFW firewall
+    #   ufw:
+    #     state: enabled
+    #     policy: allow
+
+    # - name: Install fail2ban
+    #   apt:
+    #     name: fail2ban
+    #     state: present

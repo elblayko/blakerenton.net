@@ -1,0 +1,10 @@
+- name: Update the package cache and upgrade all installed packages
+  hosts: web_servers
+  become: true
+  gather_facts: false
+
+  tasks:
+    - name: Run the upgrade command
+      apt:
+        upgrade: yes
+        update_cache: yes

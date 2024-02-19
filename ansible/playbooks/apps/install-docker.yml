@@ -1,0 +1,44 @@
+- name: Install Docker
+  hosts: web_servers
+  become: true
+  gather_facts: false
+
+  vars_files:
+    - /ansible/vars/vars.yml
+
+  tasks:
+    - name: Install packages to allow apt to use a repository over HTTPS
+      apt:
+        pkg:
+          - ca-certificates
+          - curl
+          - gnupg
+          - lsb-release
+
+    - name: Add Docker's official GPG key
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+
+    - name: Add Docker Repository
+      apt_repository:
+        repo: deb https://download.docker.com/linux/ubuntu focal stable
+        state: present
+
+    - name: Install Docker engine
+      apt:
+        pkg:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+
+    - name: Create Docker Compose plugins folder
+      file:
+        path: /usr/local/lib/docker/cli-plugins/
+        state: directory
+
+    - name: Install Docker Compose
+      get_url:
+        url: https://github.com/docker/compose/releases/download/{{ docker.compose.version }}/docker-compose-{{ docker.compose.arcitecture }}
+        dest: /usr/local/lib/docker/cli-plugins/docker-compose
+        mode: "0755"

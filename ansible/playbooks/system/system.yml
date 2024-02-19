@@ -1,0 +1,11 @@
+- name: Configure Time
+  import_playbook: configure-time.yml
+
+- name: Configure Security
+  import_playbook: configure-security.yml
+
+# - name: Create Users
+#   import_playbook: configure-users.yml
+
+- name: Update Packages
+  import_playbook: update-packages.yml

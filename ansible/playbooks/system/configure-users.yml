@@ -1,0 +1,37 @@
+- name: Create user accounts
+  hosts: web_servers
+  become: true
+  gather_facts: false
+
+  vars_files:
+    - /ansible/vars/vars.yml
+    - /ansible/vars/encrypted_vars.yml
+
+  tasks:
+    - name: Create users
+      user:
+        name: "{{ item.name }}"
+        password: "{{ item.password | string | password_hash('sha512') }}"
+        groups: "{{ item.groups }}"
+        shell: /bin/bash
+        createhome: true
+        state: present
+      with_items: "{{ users }}"
+      no_log: true
+
+    - name: Add users to sudoers group
+      copy:
+        dest: "/etc/sudoers.d/{{ item.name }}"
+        content: "{{ item.name }} ALL=(ALL) NOPASSWD: ALL"
+      with_items: "{{ users }}"
+      when: item.sudo | bool
+      no_log: true
+
+    - name: Add public key to user authorized keys
+      authorized_key:
+        user: "{{ item.name }}"
+        key: "{{ item.pub_key }}"
+        state: present
+      with_items: "{{ users }}"
+      when: item.pub_key is defined
+      no_log: true

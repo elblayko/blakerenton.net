@@ -1,0 +1,34 @@
+- name: Deploy web application
+  hosts: web_servers
+  become: true
+  gather_facts: false
+
+  vars_files:
+    - /ansible/vars/vars.yml
+
+  tasks:
+    - name: Create web directory
+      file:
+        path: /server
+        state: directory
+
+    - name: Clone production repository
+      git:
+        repo: https://github.com/elblayko/blakerenton.net.git
+        dest: /server
+
+    - name: Copy Cloudflare Origin CA certificate
+      copy:
+        src: /ansible/certs/origin.pem
+        dest: /etc/ssl/origin.pem
+
+    - name: Copy Cloudflare Origin CA key
+      copy:
+        src: /ansible/certs/origin.key
+        dest: /etc/ssl/origin.key
+
+      # Ansible doesn't support Docker Compose > 2.0, use shell instead.
+      # Ref: https://docs.ansible.com/ansible/latest/collections/community/docker/docker_compose_module.html
+
+    - name: Start Docker Compose
+      command: docker-compose -f /server/app/docker-compose.yml up -d --force-recreate

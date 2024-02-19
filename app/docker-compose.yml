@@ -1,0 +1,33 @@
+version: "3.8"
+
+services:
+  nginx:
+    image: nginx:latest
+    networks:
+      - docker
+    ports:
+      - 80:80
+      - 443:443
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    volumes:
+      - ./config/nginx.conf:/etc/nginx/conf.d/default.conf
+      - /etc/ssl/origin.pem:/etc/ssl/origin.pem
+      - /etc/ssl/origin.key:/etc/ssl/origin.key
+
+  linkstack:
+    image: linkstackorg/linkstack
+    networks:
+      - docker
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    volumes:
+      - linkstack_data:/htdocs
+
+volumes:
+  linkstack_data:
+
+networks:
+  docker:

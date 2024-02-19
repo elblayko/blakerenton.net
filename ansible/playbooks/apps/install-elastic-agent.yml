@@ -1,0 +1,31 @@
+- name: Install Elastic Agent
+  hosts: web_servers
+  become: true
+  gather_facts: false
+
+  vars_files:
+    - /ansible/vars/vars.yml
+    - /ansible/vars/encrypted_vars.yml
+
+  tasks:
+    - name: Check if Elastic Agent is already installed
+      stat:
+        path: /opt/Elastic/Agent/elastic-agent
+      register: elastic_agent_installed
+
+    - name: Download and install Elastic Agent
+      get_url:
+        url: https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent-{{ fleet.agent_version }}-{{ fleet.agent_arcitecture }}.tar.gz
+        dest: /tmp/elastic-agent-{{ fleet.agent_version }}-{{ fleet.agent_arcitecture }}.tar.gz
+      when: elastic_agent_installed.stat.exists == false
+
+    - name: Extract the Elastic Agent archive
+      unarchive:
+        src: /tmp/elastic-agent-{{ fleet.agent_version }}-{{ fleet.agent_arcitecture }}.tar.gz
+        dest: /tmp
+        remote_src: true
+      when: elastic_agent_installed.stat.exists == false
+
+    - name: Install the Elastic Agent
+      command: sudo /tmp/elastic-agent-{{ fleet.agent_version }}-{{ fleet.agent_arcitecture }}/elastic-agent install --url={{ fleet_secret.host }} --enrollment-token={{ fleet_secret.agent_enrollment_token }} --non-interactive
+      when: elastic_agent_installed.stat.exists == false

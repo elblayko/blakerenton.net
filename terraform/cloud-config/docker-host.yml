@@ -1,0 +1,54 @@
+#cloud-config
+
+package_update: true
+package_upgrade: true
+
+packages:
+  - curl
+  - git
+  - gnupg
+  - lsb-release
+  - apt-transport-https
+  - ca-certificates
+  - ufw
+  - fail2ban
+  - tripwire
+  - docker.io
+  - docker-compose
+
+users:
+  - name: blake.renton
+    gecos: Blake Renton
+    lock_passwd: true
+    shell: /bin/bash
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    groups:
+      - users
+      - admins
+    ssh_import_id:
+      - gh:elblayko
+
+  - name: ansible
+    gecos: Ansible Service Account
+    lock_passwd: true
+    shell: /bin/bash
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    groups:
+      - users
+      - admins
+      - wheel
+    ssh_import_id:
+      - gh:elblayko
+
+runcmd:
+  - |
+    # Install cri-dockerd
+    curl -LO https://github.com/Mirantis/cri-dockerd/releases/download/v0.3.5/cri-dockerd_0.3.5.3-0.ubuntu-jammy_amd64.deb &&
+    sudo apt-get -y install -f ./cri-dockerd_0.3.5.3-0.ubuntu-jammy_amd64.deb
+
+  - |
+    # Configure firewall
+    ufw allow 80/tcp
+    ufw allow 443/tcp
+    ufw allow 22/tcp
+    ufw enable

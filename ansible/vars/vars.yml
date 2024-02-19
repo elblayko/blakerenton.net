@@ -1,0 +1,10 @@
+docker:
+  compose:
+    arcitecture: linux-x86_64
+    version: v2.17.3
+
+fleet:
+  agent_arcitecture: linux-x86_64
+  agent_version: 8.7.0
+
+timezone: America/Chicago
