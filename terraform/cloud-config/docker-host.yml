@@ -10,6 +10,7 @@ packages:
   - lsb-release
   - apt-transport-https
   - ca-certificates
+  - net-tools
   - ufw
   - fail2ban
   - tripwire
